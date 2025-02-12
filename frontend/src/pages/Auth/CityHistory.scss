@@ -1,0 +1,100 @@
+@use "../../global.scss" as *;
+
+.city-history {
+  padding: 2em;
+  background: #f9f9f9;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 800px;
+  margin: 20px auto;
+  text-align: center;
+
+  h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: $main;
+  }
+
+  select {
+    padding: 10px;
+    font-size: 1rem;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .remove-city-btn {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    transition: background 0.3s ease;
+    &:hover {
+      background: #cc0000;
+    }
+  }
+
+  .detail-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin: 1rem 0;
+    text-align: left;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+
+    .weather-icon {
+      width: 80px;
+      height: 80px;
+      margin-right: 1rem;
+    }
+
+    .detail-info {
+      p {
+        margin: 0.2rem 0;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .history-list {
+    margin-top: 2rem;
+    text-align: left;
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      li {
+        background: white;
+        padding: 10px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-size: 0.9rem;
+        color: #333;
+      }
+    }
+  }
+
+  .error {
+    color: red;
+    margin-top: 1rem;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .city-history {
+    width: 80%;
+    max-width: 390px;
+  }
+}
