@@ -77,7 +77,7 @@ project
 1. **Clone the repository**:
 
    ```bash
-   git clone https://gitlab.ideo.pl/d.olko/weather-app-laravel-react.git
+   git clone [https://gitlab.ideo.pl/d.olko/weather-app-laravel-react.git](https://github.com/dawidolko/Weather-App-Laravel-React)
    cd weather-app-laravel-react
    ```
 
