@@ -1,0 +1,13 @@
+# Docker related files
+.env
+*.log
+
+# Override file (local customizations)
+docker-compose.override.yml
+
+# Backups
+backups/
+
+# OS
+.DS_Store
+Thumbs.db

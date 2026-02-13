@@ -1,0 +1,42 @@
+# Docker Compose Override Example
+# 
+# Ten plik może być używany do lokalnych customizacji bez modyfikowania głównego docker-compose.yml
+# Skopiuj ten plik do docker-compose.override.yml i dostosuj według potrzeb
+#
+# Automatycznie jest używany przez docker-compose jeśli istnieje
+# NIE commituj docker-compose.override.yml do repozytorium!
+
+version: '3.8'
+
+services:
+  # Przykład: Dodanie dodatkowych zmiennych środowiskowych dla backendu
+  backend:
+    environment:
+      - APP_DEBUG=true
+      - LOG_LEVEL=debug
+    # Przykład: Mapowanie dodatkowego portu
+    # ports:
+    #   - "8001:80"
+
+  # Przykład: Zmiana portu frontendu
+  frontend:
+    # ports:
+    #   - "3000:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+  # Przykład: Zmiana portu MySQL
+  mysql:
+    # ports:
+    #   - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: your_custom_password
+
+  # Przykład: Dodanie dodatkowego kontenera (np. Redis)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: weather-app-redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - weather-app-network

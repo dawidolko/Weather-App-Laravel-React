@@ -1,0 +1,122 @@
+version: "3.8"
+
+name: weatherapp-project
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: weather-app-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: weather_app
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: weather_user
+      MYSQL_PASSWORD: weather_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
+    networks:
+      - weather-app-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-proot_password",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend - Laravel API
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: ..//.tools/docker/Dockerfile.backend
+    container_name: weather-app-backend
+    restart: unless-stopped
+    working_dir: /var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=weather_app
+      - DB_USERNAME=weather_user
+      - DB_PASSWORD=weather_password
+      - OPENWEATHER_API_KEY=a0aca8a89948154a4182dcecc780b513
+    ports:
+      - "8000:80"
+    volumes:
+      - ../../backend:/var/www/html
+      - backend_vendor:/var/www/html/vendor
+      - backend_storage:/var/www/html/storage
+      - ./backend-entrypoint.sh:/usr/local/bin/entrypoint.sh
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - weather-app-network
+    command: ["/usr/local/bin/entrypoint.sh"]
+
+  # Frontend - React Vite
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: ..//.tools/docker/Dockerfile.frontend
+    container_name: weather-app-frontend
+    restart: unless-stopped
+    working_dir: /app
+    environment:
+      - VITE_API_URL=http://localhost:8000
+      - VITE_APP_NAME=Weather App
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../../frontend:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - weather-app-network
+    command: npm run dev -- --host 0.0.0.0
+
+  # PHPMyAdmin (Optional)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: weather-app-phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root_password
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - weather-app-network
+
+networks:
+  weather-app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  backend_vendor:
+    driver: local
+  backend_storage:
+    driver: local
+  frontend_node_modules:
+    driver: local
