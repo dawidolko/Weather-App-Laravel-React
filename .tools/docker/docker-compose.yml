@@ -15,7 +15,6 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
     networks:
       - weather-app-network
     healthcheck:
@@ -56,14 +55,18 @@ services:
     volumes:
       - ../../backend:/var/www/html
       - backend_vendor:/var/www/html/vendor
-      - backend_storage:/var/www/html/storage
-      - ./backend-entrypoint.sh:/usr/local/bin/entrypoint.sh
+      - ./backend-entrypoint.sh:/tmp/entrypoint-win.sh:ro
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - weather-app-network
-    command: ["/usr/local/bin/entrypoint.sh"]
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        sed 's/\r$$//' /tmp/entrypoint-win.sh > /usr/local/bin/entrypoint.sh
+        chmod +x /usr/local/bin/entrypoint.sh
+        exec /usr/local/bin/entrypoint.sh
 
   # Frontend - React Vite
   frontend:
@@ -113,8 +116,6 @@ volumes:
   mysql_data:
     driver: local
   backend_vendor:
-    driver: local
-  backend_storage:
     driver: local
   frontend_node_modules:
     driver: local
