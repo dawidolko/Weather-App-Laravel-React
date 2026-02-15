@@ -1,4 +1,4 @@
-# Weather-App-Laravel-React
+# Weather-App-Laravel-React 
 
 > 🚀 **Real-Time Weather Application** - Build modern weather platforms with Laravel backend, React frontend, and automated data updates
 
