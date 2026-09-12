@@ -1,293 +1,186 @@
-# Weather-App-Laravel-React
+# Weather App
 
-> 🚀 **Real-Time Weather Application** - Build modern weather platforms with Laravel backend, React frontend, and automated data updates
+> 🌦️ **Weather that remembers** — a Laravel API and a React front end that keep the readings instead of throwing them away
 
-## 📋 Description
+**Weather App** shows the current weather for Polish cities and keeps every reading it fetches. A logged-in user builds their own list of cities; the backend asks OpenWeatherMap for the conditions, writes the answer into the database and serves the history back, so each city has a chart of where the temperature has actually been — not just where it is right now.
 
-Welcome to the **Weather App** repository! This full-stack application retrieves real-time weather data from the OpenWeatherMap API for 10 selected Polish cities, automatically updates every 30 minutes, and stores historical data in a local database. Built with a powerful Laravel backend and dynamic React frontend, this project demonstrates modern web development practices for data-driven applications.
+The two halves run separately: Laravel 11 exposes a JSON API secured with Sanctum, React 18 talks to it over Axios. The database is the point of the project — without it the app would be a thin proxy in front of somebody else's API.
 
-This repository showcases best practices in RESTful API design, scheduled task automation, React component architecture, and efficient data persistence. Perfect for learning full-stack development with Laravel and React integration.
+![Laravel](https://img.shields.io/badge/Laravel-11-FF2D20?logo=laravel&logoColor=white)
+![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?logo=php&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![Sass](https://img.shields.io/badge/Sass-1.83-CC6699?logo=sass&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?logo=mysql&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
 
-## 📁 Repository Structure
+---
 
-```
+## 🎯 Key Features
 
-Weather-App-Laravel-React/
-├── 📁 backend/ # Laravel backend application
-│ ├── 📁 app/
-│ │ ├── 🎮 Http/
-│ │ │ └── Controllers/ # API controllers
-│ │ ├── 📦 Models/ # Eloquent models
-│ │ └── 🔧 Console/
-│ │ └── Commands/ # Scheduled commands
-│ ├── 📁 config/ # Configuration files
-│ ├── 📁 database/
-│ │ ├── 🌱 seeders/ # Database seeders
-│ │ └── 🔄 migrations/ # Database migrations
-│ ├── 📁 routes/
-│ │ ├── 🌐 web.php # Web routes
-│ │ ├── 🔌 api.php # API endpoints
-│ │ ├── 📡 channels.php # Broadcasting channels
-│ │ └── ⚙️ console.php # Console commands
-│ ├── 📁 public/ # Public assets
-│ ├── 📁 resources/ # Views and assets
-│ ├── 📁 storage/ # Application storage
-│ ├── 📁 tests/ # Unit and feature tests
-│ ├── ⚙️ .env.example # Environment template
-│ ├── 🎯 artisan # Laravel CLI
-│ ├── 📦 composer.json # PHP dependencies
-│ └── 🔧 webpack.mix.js # Asset compilation
-├── 📁 frontend/ # React frontend application
-│ ├── 📁 public/
-│ │ ├── 📄 index.html # Main HTML file
-│ │ └── 🎨 favicon.ico # App favicon
-│ ├── 📁 src/
-│ │ ├── ⚛️ components/ # React components
-│ │ ├── 📄 pages/ # Page components
-│ │ ├── 🎨 App.css # Application styles
-│ │ ├── 💻 App.js # Main React component
-│ │ ├── 📐 index.css # Global styles
-│ │ └── 🚀 index.js # React entry point
-│ ├── 📦 package.json # Node.js dependencies
-│ └── 🔒 package-lock.json # Dependency lock file
-├── 📁 docs/ # Project documentation
-├── 📁 database/ # Database diagrams and files
-├── 🔧 start.sh # Linux/macOS startup script
-├── 🔧 start.bat # Windows startup script
-└── 📖 README.md # Project documentation
+- **Readings are kept, not discarded** — every fetch lands in `weather_data`, so a city has a history and the front end can draw it with Recharts rather than showing one number.
+- **Your own list of cities** — a logged-in user adds and removes cities; the list lives against the account, not in the browser, so it survives a change of device.
+- **Search any city in the world** — `/api/weather?q=` passes the query straight to OpenWeatherMap and reports honestly when the city is not there.
+- **A five-day forecast beside the current reading** — a separate endpoint takes the coordinates returned by the search, so the page answers "what now" and "what next" without a second lookup.
+- **Token authentication** — Laravel Sanctum issues the token, React stores it in a cookie and attaches it to every call; the protected routes sit behind `auth:sanctum`.
+- **A front end that is a site, not a dashboard** — home, about, blog and FAQ, with scroll animations (Framer Motion, react-scrollama), a slider and an animated counter.
+- **Forms that validate before they submit** — Formik with Yup schemas, with masks on the fields that need them.
+- **Responsive and measured** — the layout works down to a phone, and Lighthouse results for desktop and mobile are in `docs/Screenshots`.
 
-```
+---
+
+## 🖼️ Screenshots
+
+| The home page                                        | Weather for a chosen city                                |
+| ---------------------------------------------------- | -------------------------------------------------------- |
+| ![The Weather App home page](docs/Screenshots/home1.png) | ![Current conditions for a selected city](docs/Screenshots/home2.png) |
+
+| History drawn as a chart                              | The account area                                        |
+| ----------------------------------------------------- | ------------------------------------------------------- |
+| ![A chart of stored readings for one city](docs/Screenshots/home4.png) | ![The sign-in screen](docs/Screenshots/auth1.png) |
+
+| Lighthouse, desktop                                    | Lighthouse, mobile                                       |
+| ------------------------------------------------------ | -------------------------------------------------------- |
+| ![Lighthouse report for the desktop build](docs/Screenshots/lighthouse_desktop.png) | ![Lighthouse report for the mobile build](docs/Screenshots/lighthouse_mobile.png) |
+
+---
+
+## 🧩 How It Is Put Together
+
+The backend keeps three tables of its own: `cities` (what can be tracked), `user_cities` (who tracks what) and `weather_data` (every reading ever fetched). A request for a city's history reads the third one; a request for current conditions calls OpenWeatherMap and writes the answer into it on the way back.
+
+That is the whole idea of the project. The API key never reaches the browser — React talks only to Laravel, Laravel talks to OpenWeatherMap — which also means the key cannot be read out of the front-end bundle.
+
+### API endpoints
+
+| Method | Path                       | Guard   | Purpose                                  |
+| ------ | -------------------------- | ------- | ---------------------------------------- |
+| `POST` | `/api/register`            | —       | Create an account.                       |
+| `POST` | `/api/login`               | —       | Issue a Sanctum token.                   |
+| `POST` | `/api/logout`              | sanctum | Revoke the current token.                |
+| `POST` | `/api/user/update`         | sanctum | Change the account details.              |
+| `GET`  | `/api/user/cities`         | sanctum | The cities this user tracks.             |
+| `POST` | `/api/user/add-city`       | sanctum | Start tracking a city.                   |
+| `POST` | `/api/user/remove-city`    | sanctum | Stop tracking it.                        |
+| `GET`  | `/api/user/update-weather` | sanctum | Refresh the readings for tracked cities. |
+| `GET`  | `/api/city-history/{id}`   | sanctum | Stored readings for one city.            |
+| `GET`  | `/api/weather?q=`          | —       | Current conditions for a city name.      |
+| `GET`  | `/api/weather/forecast`    | —       | Five-day forecast for `lat` and `lon`.   |
+
+---
+
+## 🛠️ Technology Stack
+
+### Backend
+
+| Technology           | Version | Role                                                              |
+| -------------------- | ------- | ----------------------------------------------------------------- |
+| **Laravel**          | 11      | API, Eloquent models, migrations.                                 |
+| **PHP**              | 8.2     | Runtime.                                                          |
+| **Laravel Sanctum**  | 4       | Token authentication for the SPA.                                 |
+| **MySQL**            | 8       | Cities, subscriptions and the reading history.                    |
+| **OpenWeatherMap**   | 2.5     | Source of current conditions and the forecast.                    |
+
+### Frontend
+
+| Technology         | Version | Role                                                         |
+| ------------------ | ------- | ------------------------------------------------------------ |
+| **React**          | 18      | Component model and routing (`react-router-dom` 7).          |
+| **Vite**           | 5       | Dev server and build.                                        |
+| **Sass**           | 1.83    | Styles, organised per component.                             |
+| **Axios**          | 1.7     | API calls, with the token attached.                          |
+| **Recharts**       | 2.15    | Charts of stored readings.                                   |
+| **Framer Motion**  | 12      | Page transitions and scroll animations.                      |
+| **Formik + Yup**   | 2 / 1   | Forms and validation schemas.                                |
+
+---
 
 ## 🚀 Getting Started
 
-### 1. Clone the Repository
+### Prerequisites
+
+- PHP 8.2 or newer with Composer
+- Node.js 18 or newer with npm
+- MySQL 8 (or MariaDB)
+- An OpenWeatherMap API key — the free tier is enough
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/dawidolko/Weather-App-Laravel-React.git
 cd Weather-App-Laravel-React
 ```
 
-### 2. Backend Setup (Laravel)
-
-#### Linux/macOS:
+### 2. Backend
 
 ```bash
 cd backend
-bash ../start.sh
-```
-
-#### Windows:
-
-```bash
-cd backend
-start.bat
-```
-
-#### Manual Setup:
-
-```bash
-# Install PHP dependencies
 composer install
-
-# Create environment file
 cp .env.example .env
-
-# Generate application key
 php artisan key:generate
-
-# Configure database in .env file
-# Add OpenWeatherMap API key to .env
-
-# Run database migrations
-php artisan migrate
-
-# (Optional) Seed database
-php artisan db:seed
 ```
 
-### 3. Frontend Setup (React)
-
-#### Linux/macOS:
-
-```bash
-cd frontend
-bash ../start.sh
-```
-
-#### Windows:
-
-```bash
-cd frontend
-start.bat
-```
-
-#### Manual Setup:
-
-```bash
-# Install Node.js dependencies
-npm install
-```
-
-### 4. Start the Application
-
-#### Start Laravel Backend:
-
-```bash
-cd backend
-php artisan serve
-```
-
-- Backend API runs at [http://localhost:8000](http://localhost:8000)
-
-#### Start React Frontend:
-
-```bash
-cd frontend
-npm start
-```
-
-- Frontend application runs at [http://localhost:3000](http://localhost:3000)
-
-## ⚙️ System Requirements
-
-### **Essential Tools:**
-
-- **PHP** (version 8.0 or higher)
-- **Composer** for PHP dependency management
-- **Node.js** (version 14.0 or higher)
-- **npm** or **yarn** for JavaScript packages
-- **MySQL** or compatible database system
-- **Git** for version control
-
-### **Development Environment:**
-
-- **Laravel** (latest version)
-- **React** (latest version)
-- **Code Editor** (VS Code, PhpStorm, WebStorm)
-- **API Testing Tool** (Postman, Insomnia)
-
-### **External Services:**
-
-- **OpenWeatherMap API Key** (free registration at [openweathermap.org](https://openweathermap.org/api))
-- Valid API credentials configured in `.env` file
-
-### **Recommended Extensions:**
-
-- **Laravel** and **PHP** IntelliSense
-- **React Developer Tools** browser extension
-- **ESLint** for JavaScript code quality
-- **Prettier** for code formatting
-- **Thunder Client** or **REST Client** for API testing
-
-### **Laravel Ecosystem:**
-
-- **Eloquent ORM** for database operations
-- **Task Scheduler** for automated weather updates
-- **Laravel Mix** for asset compilation
-- **Guzzle HTTP Client** for API requests
-
-## ✨ Key Features
-
-### **🌤️ Real-Time Weather Data**
-
-- Fetches current weather conditions for 10 Polish cities
-- Temperature, humidity, wind speed, and atmospheric pressure
-- Weather descriptions and icon representations
-- Accurate and up-to-date meteorological information
-
-### **⏰ Automated Updates**
-
-- Scheduled data refresh every 30 minutes
-- Laravel Task Scheduler for background job execution
-- Automatic API calls without manual intervention
-- Efficient cron-based automation
-
-### **💾 Data Persistence**
-
-- Historical weather data storage in MySQL database
-- Archival records for trend analysis
-- Query optimization for fast data retrieval
-- Efficient database schema design
-
-### **🔌 RESTful API**
-
-- Clean API endpoints for weather data access
-- JSON response format for easy consumption
-- Proper HTTP status codes and error handling
-- CORS configuration for frontend integration
-
-### **⚛️ Dynamic React Frontend**
-
-- Modern component-based architecture
-- Real-time data rendering without page refreshes
-- Responsive design for all device sizes
-- Interactive weather visualization
-
-### **🎨 User Interface**
-
-- Clean and intuitive weather display
-- City-based weather cards or lists
-- Visual weather icons and indicators
-- Mobile-friendly responsive layout
-
-## 🛠️ Technologies Used
-
-- **Laravel** - Robust PHP framework for backend
-- **React** - Modern JavaScript library for UI
-- **MySQL** - Reliable relational database
-- **OpenWeatherMap API** - Weather data provider
-- **Eloquent ORM** - Database abstraction layer
-- **Axios** - HTTP client for API requests
-- **Laravel Task Scheduler** - Automated job execution
-- **Composer** - PHP dependency management
-- **NPM** - Node.js package management
-- **Webpack Mix** - Asset compilation and bundling
-
-## 🌍 API Configuration
-
-### **1. OpenWeatherMap API Key**
-
-Sign up at [openweathermap.org](https://openweathermap.org/api) to obtain a free API key.
-
-Add your API key to the `.env` file:
+Set the database and the API key in `.env`:
 
 ```env
-OPENWEATHER_API_KEY=your_api_key_here
+DB_DATABASE=weather_app
+DB_USERNAME=root
+DB_PASSWORD=
+
+OPENWEATHER_API_KEY=your_key_here
 ```
 
-### **2. City Configuration**
+Then create the schema and start the API:
 
-The application targets 10 major Polish cities by default. You can modify city IDs in the configuration or database table.
+```bash
+php artisan migrate --seed
+php artisan serve          # http://127.0.0.1:8000
+```
 
-Refer to the [OpenWeatherMap city list](http://bulk.openweathermap.org/sample/city.list.json.gz) for valid city IDs.
+### 3. Frontend
 
-### **3. Update Frequency**
+```bash
+cd ../frontend
+npm install
+npm run dev                # http://localhost:5173
+```
 
-Weather data updates automatically every 30 minutes via Laravel's task scheduler. To modify the frequency, edit the scheduled task in `app/Console/Kernel.php`.
+The front end calls `http://127.0.0.1:8000/api` directly, so the backend has to be running on that address. Serving it elsewhere means changing the base URL in `src/Context/AuthContext.jsx` and the components under `src/components/Product/`.
 
-## 📊 Project Status
+### 4. Keeping the readings fresh
 
-✅ **Completed** - Fully functional weather application with automated updates!
-
-## 🤝 Contributing
-
-Contributions are highly welcomed! Here's how you can help:
-
-- 🐛 **Report bugs** - Found an issue? Let us know!
-- 💡 **Suggest improvements** - Have ideas for better features?
-- 🔧 **Submit pull requests** - Share your enhancements and solutions
-- 📖 **Improve documentation** - Help make the project clearer
-
-Feel free to open issues or reach out through GitHub for any questions or suggestions.
-
-## 👨‍💻 Author
-
-Created by **Dawid Olko** - Part of the full-stack web development series.
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
+The history grows whenever a reading is fetched. `GET /api/user/update-weather` refreshes every city the signed-in user tracks and writes the results into `weather_data`; calling it on a schedule (cron, a queued job) is what turns the table into a real archive.
 
 ---
 
-⭐ **Found this helpful?** Give it a star and share with fellow full-stack developers!
+## 📁 Project Structure
+
+```
+Weather-App-Laravel-React/
+├── backend/                        # Laravel 11 API
+│   ├── app/
+│   │   ├── Http/Controllers/
+│   │   │   ├── AuthController.php      # register, login, logout, profile
+│   │   │   ├── UserCityController.php  # tracked cities and their history
+│   │   │   └── WeatherController.php   # OpenWeatherMap: current and forecast
+│   │   └── Models/
+│   │       ├── City.php
+│   │       ├── WeatherData.php         # one stored reading
+│   │       └── User.php
+│   ├── database/migrations/            # users, cities, user_cities, weather_data
+│   └── routes/api.php                  # the table above
+├── frontend/                       # React 18 + Vite
+│   └── src/
+│       ├── components/                 # Navbar, Hero, Map, Counter, Footer…
+│       ├── pages/                      # Home, About, Blog, Faq, Auth
+│       ├── Context/                    # session and API state
+│       └── global.scss                 # shared styles
+├── database/                       # SQL dump for a quick import
+└── docs/                           # documentation and screenshots
+```
+
+---
+
+## 📄 License
+
+MIT © [Dawid Olko](https://dawidolko.pl)
