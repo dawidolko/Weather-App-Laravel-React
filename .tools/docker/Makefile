@@ -1,45 +1,45 @@
 .PHONY: help up down restart logs ps build clean migrate seed fresh install backend frontend db
 
-# Kolory dla outputu
+# Output colors
 GREEN  := \033[0;32m
 YELLOW := \033[0;33m
 RED    := \033[0;31m
 NC     := \033[0m # No Color
 
-help: ## Pokaż pomoc
+help: # Show help
 	@echo "$(GREEN)Weather App - Docker Commands$(NC)"
 	@echo ""
-	@echo "$(YELLOW)Dostępne komendy:$(NC)"
+	@echo "$(YELLOW)Available commands:$(NC)"
 	@awk 'BEGIN {FS = ":.*##"; printf ""} /^[a-zA-Z_-]+:.*?##/ { printf "  $(GREEN)%-15s$(NC) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@echo ""
 
-up: ## Uruchom wszystkie kontenery
+up: # Start all containers
 	@echo "$(GREEN)Starting all containers...$(NC)"
 	docker compose up -d
 	@echo "$(GREEN)Done! Check status with 'make ps'$(NC)"
 
-down: ## Zatrzymaj wszystkie kontenery
+down: # Stop all containers
 	@echo "$(YELLOW)Stopping all containers...$(NC)"
 	docker compose down
 	@echo "$(GREEN)Done!$(NC)"
 
-restart: ## Zrestartuj wszystkie kontenery
+restart: # Restart all containers
 	@echo "$(YELLOW)Restarting all containers...$(NC)"
 	docker compose restart
 	@echo "$(GREEN)Done!$(NC)"
 
-logs: ## Pokaż logi wszystkich kontenerów
+logs: # Show logs of all containers
 	docker compose logs -f
 
-ps: ## Pokaż status kontenerów
+ps: # Show container status
 	docker compose ps
 
-build: ## Przebuduj wszystkie obrazy
+build: # Rebuild all images
 	@echo "$(YELLOW)Building all images...$(NC)"
 	docker compose build --no-cache
 	@echo "$(GREEN)Done!$(NC)"
 
-clean: ## Usuń wszystkie kontenery i woluminy (UWAGA: usuwa dane!)
+clean: # Remove all containers and volumes (WARNING: deletes data!)
 	@echo "$(RED)WARNING: This will delete all data including database!$(NC)"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo ""; \
@@ -50,17 +50,17 @@ clean: ## Usuń wszystkie kontenery i woluminy (UWAGA: usuwa dane!)
 		echo "$(YELLOW)Cancelled$(NC)"; \
 	fi
 
-migrate: ## Uruchom migracje bazy danych
+migrate: # Run the database migrations
 	@echo "$(YELLOW)Running migrations...$(NC)"
 	docker compose exec backend php artisan migrate
 	@echo "$(GREEN)Done!$(NC)"
 
-seed: ## Uruchom seedery
+seed: # Run the seeders
 	@echo "$(YELLOW)Running seeders...$(NC)"
 	docker compose exec backend php artisan db:seed
 	@echo "$(GREEN)Done!$(NC)"
 
-fresh: ## Zresetuj bazę (migrate:fresh + seed)
+fresh: # Reset the database (migrate:fresh + seed)
 	@echo "$(RED)WARNING: This will delete all data from database!$(NC)"
 	@read -p "Are you sure? [y/N] " -n 1 -r; \
 	echo ""; \
@@ -71,26 +71,26 @@ fresh: ## Zresetuj bazę (migrate:fresh + seed)
 		echo "$(YELLOW)Cancelled$(NC)"; \
 	fi
 
-install: ## Zainstaluj zależności (composer + npm)
+install: # Install dependencies (composer + npm)
 	@echo "$(YELLOW)Installing dependencies...$(NC)"
 	docker compose exec backend composer install
 	docker compose exec frontend npm install
 	@echo "$(GREEN)Done!$(NC)"
 
-backend: ## Wejdź do kontenera backendu
+backend: # Enter the backend container
 	docker compose exec backend bash
 
-frontend: ## Wejdź do kontenera frontendu
+frontend: # Enter the frontend container
 	docker compose exec frontend sh
 
-db: ## Połącz się z MySQL
+db: # Connect to MySQL
 	docker compose exec mysql mysql -uweather_user -pweather_password weather_app
 
-test: ## Uruchom testy backendu
+test: # Run the backend tests
 	@echo "$(YELLOW)Running tests...$(NC)"
 	docker compose exec backend php artisan test
 
-cache-clear: ## Wyczyść cache Laravel
+cache-clear: # Clear the Laravel cache
 	@echo "$(YELLOW)Clearing cache...$(NC)"
 	docker compose exec backend php artisan cache:clear
 	docker compose exec backend php artisan config:clear
@@ -98,13 +98,13 @@ cache-clear: ## Wyczyść cache Laravel
 	docker compose exec backend php artisan view:clear
 	@echo "$(GREEN)Done!$(NC)"
 
-backup: ## Backup bazy danych
+backup: # Back up the database
 	@echo "$(YELLOW)Creating database backup...$(NC)"
 	@mkdir -p backups
 	docker compose exec mysql mysqldump -uroot -proot_password weather_app > backups/backup_$$(date +%Y%m%d_%H%M%S).sql
 	@echo "$(GREEN)Backup created in backups/ directory$(NC)"
 
-restore: ## Restore bazy z ostatniego backupu
+restore: # Restore the database from the latest backup
 	@echo "$(YELLOW)Restoring database from latest backup...$(NC)"
 	@LATEST=$$(ls -t backups/*.sql 2>/dev/null | head -1); \
 	if [ -z "$$LATEST" ]; then \
@@ -115,7 +115,7 @@ restore: ## Restore bazy z ostatniego backupu
 	docker compose exec -T mysql mysql -uroot -proot_password weather_app < $$LATEST; \
 	echo "$(GREEN)Done!$(NC)"
 
-status: ## Pełny status aplikacji
+status: # Full application status
 	@echo "$(GREEN)=== Docker Containers ===$(NC)"
 	@docker compose ps
 	@echo ""

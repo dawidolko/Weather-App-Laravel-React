@@ -7,17 +7,15 @@ echo ""
 echo "Starting Docker containers..."
 echo ""
 
-# Przejdź do katalogu z docker-compose
+# Go to the docker-compose directory
 cd "$(dirname "$0")"
 
-# Sprawdź czy Docker jest zainstalowany
 if ! command -v docker &> /dev/null; then
     echo "❌ Error: Docker is not installed!"
     echo "Please install Docker Desktop from: https://www.docker.com/products/docker-desktop"
     exit 1
 fi
 
-# Sprawdź czy Docker Compose jest dostępny
 if ! docker compose version &> /dev/null; then
     echo "❌ Error: Docker Compose is not available!"
     echo "Please make sure Docker Desktop is running."
@@ -27,7 +25,7 @@ fi
 echo "✅ Docker is ready!"
 echo ""
 
-# Sprawdź czy kontenery już działają
+# Check whether the containers are already running
 if docker compose ps | grep -q "Up"; then
     echo "⚠️  Containers are already running!"
     echo ""
@@ -43,7 +41,6 @@ if docker compose ps | grep -q "Up"; then
         exit 0
     fi
 else
-    # Uruchom kontenery
     docker compose up -d
 fi
 
@@ -53,10 +50,9 @@ echo "⏳ Waiting for services to start..."
 echo "================================="
 echo ""
 
-# Poczekaj aż kontenery będą gotowe
+# Wait for the containers to become ready
 sleep 5
 
-# Sprawdź status
 echo "Container status:"
 docker compose ps
 echo ""

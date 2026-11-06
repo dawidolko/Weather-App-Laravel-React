@@ -48,7 +48,7 @@ export default function ProductSearch() {
   };
 
   /**
-   * Dodawanie miasta do profilu
+   * Add a city to the profile
    */
   const handleAddToProfile = async () => {
     if (!user || !token) {

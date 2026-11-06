@@ -5,7 +5,7 @@ echo Weather App - Docker Shutdown
 echo =================================
 echo.
 
-REM Przejdź do katalogu z docker-compose
+REM Go to the docker-compose directory
 cd /d "%~dp0"
 
 echo Stopping all containers...

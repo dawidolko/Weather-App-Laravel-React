@@ -8,10 +8,10 @@ echo.
 echo Starting Docker containers...
 echo.
 
-REM Przejdź do katalogu z docker-compose
+REM Go to the docker-compose directory
 cd /d "%~dp0"
 
-REM Sprawdź czy Docker jest zainstalowany
+REM Check whether Docker is installed
 docker --version >nul 2>&1
 if errorlevel 1 (
     echo [91mError: Docker is not installed![0m
@@ -20,7 +20,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Sprawdź czy Docker Compose jest dostępny
+REM Check whether Docker Compose is available
 docker compose version >nul 2>&1
 if errorlevel 1 (
     echo [91mError: Docker Compose is not available![0m
@@ -32,7 +32,7 @@ if errorlevel 1 (
 echo [92mDocker is ready![0m
 echo.
 
-REM Sprawdź czy kontenery już działają
+REM Check whether the containers are already running
 docker compose ps | findstr "Up" >nul 2>&1
 if not errorlevel 1 (
     echo [93mContainers are already running![0m
@@ -48,7 +48,7 @@ if not errorlevel 1 (
         goto end
     )
 ) else (
-    REM Uruchom kontenery
+    REM Start the containers
     docker compose up -d
 )
 
@@ -58,15 +58,15 @@ echo Waiting for services to start...
 echo =================================
 echo.
 
-REM Poczekaj aż kontenery będą gotowe
+REM Wait until the containers are ready
 timeout /t 5 /nobreak >nul
 
-REM Sprawdź status
+REM Check the status
 echo Container status:
 docker compose ps
 echo.
 
-REM Poczekaj na backend
+REM Wait for the backend
 echo Waiting for backend to be ready...
 set max_attempts=30
 set attempt=0

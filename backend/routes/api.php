@@ -23,8 +23,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/city-history/{cityId}', [UserCityController::class, 'getCityHistory']);
 });
 
-// Endpoint wyszukiwania aktualnej pogody
+/*
+ * Endpoint for searching the current weather
+ */
 Route::get('/weather', [WeatherController::class, 'searchCity']);
 
-// Nowy endpoint do pobierania prognozy pogodowej
 Route::get('/weather/forecast', [WeatherController::class, 'forecast']);

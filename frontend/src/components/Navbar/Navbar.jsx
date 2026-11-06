@@ -96,7 +96,9 @@ const Navbar = () => {
                 BLOG
               </NavLink>
             </li>
-            {/* Sekcja użytkownika */}
+            {/*
+              User section
+            */}
             <li className="navbar__auth">
               {user ? (
                 <div

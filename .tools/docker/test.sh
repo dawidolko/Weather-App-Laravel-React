@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Weather App Docker - Test Script
-# Ten skrypt testuje czy wszystko jest poprawnie skonfigurowane
+# This script tests whether everything is configured correctly
 
 echo "=========================================="
 echo "Weather App Docker - Configuration Test"

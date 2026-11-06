@@ -5,7 +5,7 @@ echo "Weather App - Docker Shutdown"
 echo "================================="
 echo ""
 
-# Przejdź do katalogu z docker-compose
+# Go to the docker-compose directory
 cd "$(dirname "$0")"
 
 echo "Stopping all containers..."

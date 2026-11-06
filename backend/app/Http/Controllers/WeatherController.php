@@ -10,7 +10,7 @@ use App\Models\WeatherData;
 class WeatherController extends Controller
 {
     /**
-     * Wyszukiwanie aktualnej pogody dla miasta.
+     * Look up the current weather for a city.
      */
     public function searchCity(Request $request)
     {
@@ -62,14 +62,16 @@ class WeatherController extends Controller
             'weather_description' => $data['weather'][0]['description'],
         ]);
         
-        // Dodajemy do danych wysyłanych do frontendu city_db_id (ID w naszej bazie)
+        /*
+         * Add city_db_id (the ID in our database) to the data sent to the frontend
+         */
         $data['city_db_id'] = $city->id;
         
         return response()->json($data);
     }
     
     /**
-     * Pobieranie prognozy pogodowej – endpoint wykorzystywany przez frontend.
+     * Fetch the weather forecast - endpoint used by the frontend.
      */
     public function forecast(Request $request)
     {
